@@ -71,4 +71,29 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        # pass
+        LDI = 0b10000010
+        HLT = 0b00000001
+        PRN = 0b01000111
+        running = True
+        while running:
+            # FETCH
+            IR = self.ram_read(self.pc)
+            print('===', IR)
+            # DECODE
+            if IR == PRN:
+            # EXECUTE
+                self.raw_write(PRN, self.load)
+            elif IR == LDI:
+                self.raw_write(LDI, self.load)
+            # DECODE
+            elif IR == HLT:
+            # EXECUTE
+                running = False
+            # DECODE (ERROR)
+            else:
+            # EXECUTE
+                print(f"Unknown Instruction {IR}")
+                sys.exit(1)
+
+            self.pc += 1
