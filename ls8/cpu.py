@@ -76,9 +76,15 @@ class CPU:
         LDI = 0b10000010
         PRN= 0b01000111
         HLT = 0b00000001
+
+        IR = self.ram_read(self.pc)
+        operand_a = self.ram_read(self.pc + 1)
+        operand_b = self.ram_read(self.pc + 2)
+        print('==RAM=',self.ram)
+        print('==b=',operand_b)
+        print('==a=',operand_a)
         
         running = True
-
         while running:
             IR = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
