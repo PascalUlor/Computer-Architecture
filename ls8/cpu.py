@@ -80,9 +80,6 @@ class CPU:
         IR = self.ram_read(self.pc)
         operand_a = self.ram_read(self.pc + 1)
         operand_b = self.ram_read(self.pc + 2)
-        print('==RAM=',self.ram)
-        print('==b=',operand_b)
-        print('==a=',operand_a)
         
         running = True
         while running:
