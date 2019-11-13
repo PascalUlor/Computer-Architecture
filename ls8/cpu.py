@@ -138,20 +138,16 @@ class CPU:
             elif IR == PUSH:
                 # EXECUTE
                 # SETUP
-                val = self.reg[operand_a]
-
                 # PUSH
                 self.reg[self.sp] -= 1
-                self.ram[self.reg[self.sp]] = val
+                self.ram[self.reg[self.sp]] = self.reg[operand_a]
                 self.pc += 2
             elif IR == POP:
                 # EXECUTE
                 # SETUP
-                val = self.reg[operand_a]
-
                 # POP
+                self.reg[operand_a] = self.ram_read(self.reg[self.sp])
                 self.reg[self.sp] += 1
-                val = self.ram_read(self.reg[self.sp])
                 self.pc += 2
             elif IR == HLT:
                 running = False
