@@ -58,13 +58,15 @@ class CPU:
 
                 # set the number to an integer of base 2
                     value = int(num, 2)
-                    program.append(value)
+                    # program.append(value)
+                    self.ram_write(address, value)
+                    address += 1
                 # print the value in binary and in decimal
                     print(f"{value:08b}: {value:d}")
 
-            for instruction in program:
-                self.ram_write(address, instruction)
-                address += 1
+            # for instruction in program:
+            #     self.ram_write(address, instruction)
+            #     address += 1
         except FileNotFoundError:
             print(f"{sys.argv[0]}: {sys.argv[1]} not found")
             sys.exit(2)
