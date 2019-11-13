@@ -128,7 +128,6 @@ class CPU:
                 self.pc += 2
             elif IR == MUL:
                 self.alu("MUL",operand_a, operand_b)
-                # print(self.reg[operand_a])
                 self.pc += 3 # move to next MAR
             elif IR == HLT:
                 running = False
