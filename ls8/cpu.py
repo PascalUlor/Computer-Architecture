@@ -35,30 +35,39 @@ class CPU:
         #     0b00000001, # HLT
         # ]
         program = []
-        with open(sys.argv[1]) as f:
-            for line in f:
-            # deal with comments
-            # split before and after any comment symbol '#'
-                comment_split = line.split("#")
+        # check if filename is passed as argument in command line
+        if len(sys.argv) != 2:
+            print("usage: ls8.py <filename>")
+            sys.exit(1)
 
-            # convert the pre-comment portion (to the left) from binary to a value
-            # extract the first part of the split to a number variable
-            # and trim whitespace
-                num = comment_split[0].strip()
+        try:
+            with open(sys.argv[1]) as f:
+                for line in f:
+                # deal with comments
+                # split before and after any comment symbol '#'
+                    comment_split = line.split("#")
 
-            # ignore blank lines / comment only lines
-                if len(num) == 0:
-                    continue
+                # convert the pre-comment portion (to the left) from binary to a value
+                # extract the first part of the split to a number variable
+                # and trim whitespace
+                    num = comment_split[0].strip()
 
-            # set the number to an integer of base 2
-                value = int(num, 2)
-                program.append(value)
-            # print the value in binary and in decimal
-                print(f"{value:08b}: {value:d}")
+                # ignore blank lines / comment only lines
+                    if len(num) == 0:
+                        continue
 
-        for instruction in program:
-            self.ram_write(address, instruction)
-            address += 1
+                # set the number to an integer of base 2
+                    value = int(num, 2)
+                    program.append(value)
+                # print the value in binary and in decimal
+                    print(f"{value:08b}: {value:d}")
+
+            for instruction in program:
+                self.ram_write(address, instruction)
+                address += 1
+        except FileNotFoundError:
+            print(f"{sys.argv[0]}: {sys.argv[1]} not found")
+            sys.exit(2)
 
 
     def alu(self, op, reg_a, reg_b):
@@ -67,7 +76,7 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
-        elif op == 'MUL':
+        elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
         else:
             raise Exception("Unsupported ALU operation")
@@ -118,6 +127,8 @@ class CPU:
                 print(self.reg[operand_a])
                 self.pc += 2
             elif IR == MUL:
+                self.alu("MUL",operand_a, operand_b)
+                # print(self.reg[operand_a])
                 self.pc += 3 # move to next MAR
             elif IR == HLT:
                 running = False
