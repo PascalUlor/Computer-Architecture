@@ -197,3 +197,4 @@ class CPU:
         self.pc = self.ram[self.reg[self.sp]]
         self.reg[self.sp] += 1
         self.op_pc = True
+        
