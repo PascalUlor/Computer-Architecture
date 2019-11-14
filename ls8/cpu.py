@@ -1,7 +1,7 @@
 """CPU functionality."""
 
 import sys
-
+# decalre operands
 LDI = 0b10000010
 PRN= 0b01000111
 HLT = 0b00000001
@@ -121,14 +121,6 @@ class CPU:
     def run(self):
         """Run the CPU."""
         # pass
-        # decalre operands
-        # LDI = 0b10000010
-        # PRN= 0b01000111
-        # HLT = 0b00000001
-        # MUL = 0b10100010 # MUL
-        # PUSH = 0b01000101 # PUSH R0
-        # POP = 0b01000110 # POP R2
-
         IR = self.ram_read(self.pc)
         operand_a = self.ram_read(self.pc + 1)
         operand_b = self.ram_read(self.pc + 2)
@@ -138,37 +130,10 @@ class CPU:
             IR = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            # Read from ram to check values in address ram.read()
-            # if IR == LDI:
-            #     self.reg[operand_a] = operand_b
-            #     self.pc += 3 # move to next MAR
-            # if IR == PRN:
-            #     print(self.reg[operand_a])
-            #     self.pc += 2
-            # elif IR == MUL:
-            #     self.alu("MUL",operand_a, operand_b)
-            #     self.pc += 3 # move to next MAR
-            # elif IR == PUSH:
-            #     # EXECUTE
-            #     # SETUP
-            #     # PUSH
-            #     self.reg[self.sp] -= 1
-            #     self.ram[self.reg[self.sp]] = self.reg[operand_a]
-            #     self.pc += 2
-            # elif IR == POP:
-            #     # EXECUTE
-            #     # SETUP
-            #     # POP
-            #     self.reg[operand_a] = self.ram_read(self.reg[self.sp])
-            #     self.reg[self.sp] += 1
-            #     self.pc += 2
-            # elif IR == HLT:
-            #     running = False
             if IR in self.branchtable:
                 self.branchtable[IR](operand_a, operand_b)
             else:
                 raise Exception(f"Invalid instruction")
-            # self.pc += instruction_size
 
     
     def handle_LDI(self, op_id1, op_id2):
@@ -201,4 +166,3 @@ class CPU:
 
     def handle_HLT(self, op_id1, op_id2):
         sys.exit()
-        # running = False
