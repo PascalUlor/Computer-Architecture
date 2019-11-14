@@ -1,7 +1,13 @@
 """CPU functionality."""
 
 import sys
-
+# decalre operands
+LDI = 0b10000010
+PRN= 0b01000111
+HLT = 0b00000001
+MUL = 0b10100010 # MUL
+PUSH = 0b01000101 # PUSH R0
+POP = 0b01000110 # POP R2
 class CPU:
     """Main CPU class."""
 
@@ -11,6 +17,15 @@ class CPU:
         self.ram = [0]*256
         self.reg = [0]*8
         self.pc = 0
+        self.sp = 7
+        self.reg[self.sp] = 0xF4
+        self.branchtable = {}
+        self.branchtable[LDI] = self.handle_LDI
+        self.branchtable[PRN] = self.handle_PRN
+        self.branchtable[HLT] = self.handle_HLT
+        self.branchtable[MUL] = self.handle_MUL
+        self.branchtable[PUSH] = self.handle_PUSH
+        self.branchtable[POP] = self.handle_POP
 
     def ram_read(self, address):
         return self.ram[address]
@@ -34,7 +49,7 @@ class CPU:
         #     0b00000000,
         #     0b00000001, # HLT
         # ]
-        program = []
+        # program = []
         # check if filename is passed as argument in command line
         if len(sys.argv) != 2:
             print("usage: ls8.py <filename>")
@@ -106,12 +121,6 @@ class CPU:
     def run(self):
         """Run the CPU."""
         # pass
-        # decalre operands
-        LDI = 0b10000010
-        PRN= 0b01000111
-        HLT = 0b00000001
-        MUL = 0b10100010 # MUL
-
         IR = self.ram_read(self.pc)
         operand_a = self.ram_read(self.pc + 1)
         operand_b = self.ram_read(self.pc + 2)
@@ -121,15 +130,39 @@ class CPU:
             IR = self.ram_read(self.pc)
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
-            # Read from ram to check values in address ram.read()
-            if IR == LDI:
-                self.reg[operand_a] = operand_b
-                self.pc += 3 # move to next MAR
-            elif IR == PRN:
-                print(self.reg[operand_a])
-                self.pc += 2
-            elif IR == MUL:
-                self.alu("MUL",operand_a, operand_b)
-                self.pc += 3 # move to next MAR
-            elif IR == HLT:
-                running = False
+            if IR in self.branchtable:
+                self.branchtable[IR](operand_a, operand_b)
+            else:
+                raise Exception(f"Invalid instruction")
+
+    
+    def handle_LDI(self, op_id1, op_id2):
+        self.reg[op_id1] = op_id2
+        self.pc += 3 # move to next MAR
+
+    def handle_PRN(self, op_id1, op_id2):
+        print(self.reg[op_id1])
+        self.pc += 2
+
+    def handle_MUL(self, op_id1, op_id2):
+        self.alu("MUL",op_id1, op_id2)
+        self.pc += 3 # move to next MAR
+    
+    def handle_PUSH(self, op_id1, op_id2):
+        # EXECUTE
+        # SETUP
+        # PUSH
+        self.reg[self.sp] -= 1
+        self.ram[self.reg[self.sp]] = self.reg[op_id1]
+        self.pc += 2
+
+    def handle_POP(self, op_id1, op_id2):
+        # EXECUTE
+        # SETUP
+        # POP
+        self.reg[op_id1] = self.ram_read(self.reg[self.sp])
+        self.reg[self.sp] += 1
+        self.pc += 2
+
+    def handle_HLT(self, op_id1, op_id2):
+        sys.exit()
