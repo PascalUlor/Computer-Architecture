@@ -8,6 +8,9 @@ HLT = 0b00000001
 MUL = 0b10100010 # MUL
 PUSH = 0b01000101 # PUSH R0
 POP = 0b01000110 # POP R2
+CALL = 0b01010000
+RET = 0b00010001
+ADD = 0b10100000 # ADD R0,R0
 class CPU:
     """Main CPU class."""
 
@@ -19,6 +22,7 @@ class CPU:
         self.pc = 0
         self.sp = 7
         self.reg[self.sp] = 0xF4
+        self.op_pc = False
         self.branchtable = {}
         self.branchtable[LDI] = self.handle_LDI
         self.branchtable[PRN] = self.handle_PRN
@@ -26,6 +30,9 @@ class CPU:
         self.branchtable[MUL] = self.handle_MUL
         self.branchtable[PUSH] = self.handle_PUSH
         self.branchtable[POP] = self.handle_POP
+        self.branchtable[CALL] = self.handle_CALL
+        self.branchtable[RET] = self.handle_RET
+        self.branchtable[ADD] = self.handle_ADD
 
     def ram_read(self, address):
         return self.ram[address]
@@ -133,20 +140,33 @@ class CPU:
             if IR in self.branchtable:
                 self.branchtable[IR](operand_a, operand_b)
             else:
-                raise Exception(f"Invalid instruction")
+                print(f"Unknown Instruction")
+                sys.exit(1)
 
     
     def handle_LDI(self, op_id1, op_id2):
         self.reg[op_id1] = op_id2
-        self.pc += 3 # move to next MAR
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 3 # move to next MAR
 
     def handle_PRN(self, op_id1, op_id2):
         print(self.reg[op_id1])
-        self.pc += 2
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 2
 
     def handle_MUL(self, op_id1, op_id2):
         self.alu("MUL",op_id1, op_id2)
-        self.pc += 3 # move to next MAR
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 3 # move to next MAR
+    
+    def handle_ADD(self, op_id1, op_id2):
+        self.alu("ADD",op_id1, op_id2)
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 3 # move to next MAR
     
     def handle_PUSH(self, op_id1, op_id2):
         # EXECUTE
@@ -154,7 +174,9 @@ class CPU:
         # PUSH
         self.reg[self.sp] -= 1
         self.ram[self.reg[self.sp]] = self.reg[op_id1]
-        self.pc += 2
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 2
 
     def handle_POP(self, op_id1, op_id2):
         # EXECUTE
@@ -162,7 +184,29 @@ class CPU:
         # POP
         self.reg[op_id1] = self.ram_read(self.reg[self.sp])
         self.reg[self.sp] += 1
-        self.pc += 2
+        self.op_pc = False
+        if not self.op_pc:
+            self.pc += 2
 
     def handle_HLT(self, op_id1, op_id2):
         sys.exit()
+
+   
+    def handle_CALL(self, op_id1, op_id2):
+        # EXECUTE
+        # SETUP
+        # reg = memory[pc + 1]
+
+        # CALL
+        self.reg[self.sp] -= 1 # Decrement Stack Pointer
+        # memory[register[SP]] = pc + 2 # Push PC + 2 on to the stack
+        self.ram[self.reg[self.sp]] = self.pc + 2
+
+        # set pc to subroutine
+        # pc = register[reg]
+        self.pc = self.reg[op_id1]
+        self.op_pc = True
+    def handle_RET(self, op_id1, op_id2):
+        self.pc = self.ram_read(self.reg[self.sp])
+        self.reg[self.sp] += 1
+        self.op_pc = True
